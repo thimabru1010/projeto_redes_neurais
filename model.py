@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 class MLPClassifier(nn.Module):
-    def __init__(self, input_dim, hidden_layers, output_dim, dropout=0.0):
+    def __init__(self, input_dim, hidden_layers, output_dim, dropout=0.2, norm_layer=None):
         """
         input_dim: int, number of input features
         hidden_layers: list of int, number of units in each hidden layer
@@ -14,6 +14,10 @@ class MLPClassifier(nn.Module):
         prev_dim = input_dim
         for h_dim in hidden_layers:
             layers.append(nn.Linear(prev_dim, h_dim))
+            if norm_layer == 'batch':
+                layers.append(nn.BatchNorm1d(h_dim))
+            elif norm_layer == 'layer':
+                layers.append(nn.LayerNorm(h_dim))
             layers.append(nn.ReLU())
             if dropout > 0.0:
                 layers.append(nn.Dropout(dropout))

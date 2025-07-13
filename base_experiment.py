@@ -94,7 +94,7 @@ class BaseExperiment:
                     print(f"Early stopping triggered after {epoch+1} epochs")
                     print(f"Best validation loss: {best_valid_loss:.4f}")
                     print('Saving the best model state...')
-                    model_path = os.path.join(self.output_dir, f"best_model_epoch_{epoch+1}.pth")
+                    model_path = os.path.join(self.output_dir, f"best_model.pth")
                     self.save_model(model_path, best_model_state)
                     break
         

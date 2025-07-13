@@ -9,6 +9,8 @@ from base_experiment import BaseExperiment
 import argparse
 import os
 from sklearn.metrics import accuracy_score, f1_score
+from focal_loss import FocalLoss
+
 def evaluate_on_test_set(model, criterion, device, output_dir, batch_size=256):
     """
     Avalia o modelo no conjunto de teste e imprime loss, accuracy e f1.
@@ -67,7 +69,7 @@ if __name__ == "__main__":
                         help='Learning rate for the optimizer')
     parser.add_argument('--epochs', type=int, default=50,
                         help='Number of epochs for training')
-    parser.add_argument('--weight_decay', type=float, default=1e-2,
+    parser.add_argument('--weight_decay', type=float, default=1e-3,
                         help='L2 regularization weight (weight_decay) for optimizer')
     parser.add_argument('--layer_norm', type=str, default=None, choices=[None, 'batch', 'layer'],
                         help='Normalization layer to use in the MLP (batch or layer normalization)')
@@ -114,11 +116,13 @@ if __name__ == "__main__":
     model = MLPClassifier(input_dim=X.shape[1], hidden_layers=hidden_layers, output_dim=1, dropout=args.dropout).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
     # criterion = torch.nn.CrossEntropyLoss()
-    criterion = torch.nn.BCEWithLogitsLoss()  # Ajuste para classificação binária
+    # criterion = torch.nn.BCEWithLogitsLoss()  # Ajuste para classificação binária
+    # Testar a focal loss
+    criterion = FocalLoss(alpha=0.4, gamma=2.5, reduction='mean')
     
     # Scheduler para decaimento da learning rate (CosineAnnealingLR)
     # scheduler = CosineAnnealingLR(optimizer, T_max=args.epochs, eta_min=1e-6)
-    scheduler = ExponentialLR(optimizer, gamma=0.9) # gamma define o fator de decaimento
+    scheduler = ExponentialLR(optimizer, gamma=0.85) # gamma define o fator de decaimento
 
     # Experimento
     experiment = BaseExperiment(model, optimizer, criterion, device, output_dir)
